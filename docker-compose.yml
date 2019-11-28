@@ -1,0 +1,42 @@
+
+version: '3'
+
+services:
+
+  db:
+    image: mysql:5.7
+    environment:
+      MYSQL_ROOT_PASSWORD: laura
+      MYSQL_DATABASE: transaccionesbancarias
+      MYSQL_USER: transacciones
+      MYSQL_PASSWORD: transacciones
+    restart: always
+    ports:
+      - "3306:3306"
+    volumes:
+      - ./storage:/var/lib/mysql
+      - ./db:/docker-entrypoint-initdb.d
+
+  web:
+    #image: tomcat:8.5-jdk13-openjdk-oracle
+    image: tomcat:latest
+    # Environment variables do not appear to be getting loaded the first time Tomcat starts!
+    # Esta variables es necesario consumir 
+    environment:
+      JDBC_URL: jdbc:mysql://db:3306/example_db?connectTimeout=0&amp;socketTimeout=0&amp;autoReconnect=true
+      JDBC_USER: transacciones
+      JDBC_PASS: transacciones
+    ports:
+      - "80:8080"
+    volumes:
+      - ./tomcat/webapps/app:/usr/local/tomcat/webapps/app
+    links:
+      - db
+
+  adminer:
+    image: adminer
+    restart: always
+    ports:
+      - "81:8080"
+    links:
+      - db
